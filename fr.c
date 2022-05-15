@@ -1,5 +1,8 @@
 #include<stdio.h>
 #include<unistd.h>
+#include<wchar.h>
+#include<locale.h>
+#include<stdlib.h>
 #define SPEED 10000
 
 FILE* text;
@@ -11,25 +14,23 @@ char green[] = "\033[0;32m";
 
 
 int main(int argc, char **argv){
-
+    setlocale(LC_ALL, "");
     text = fopen(argv[1], "r");
     if(text == NULL){
         fprintf(stderr, "\nCan't open file\n");
         return 0;}
     else{
         printf("\n%s%s%s\n", green, argv[1], lime);
-        char i;
+        wchar_t i;
         int highlight = 0;
-        i = (char)getc(text);
-        while(i != EOF){
+        while((i = fgetwc(text)) != WEOF){
             fflush(text);
             if(highlight > 0 && i != '(' && i != ')' && i != '{' && i != '}'){
-                printf(cyan);
+                printf("%s", cyan);
             }
             else{
-                printf(lime);
+                printf("%s", lime);
             }
-            printf("%c", i);
 
             if(i == '('  || i == '{'){
                 highlight++;
@@ -37,14 +38,13 @@ int main(int argc, char **argv){
             if(i == ')' || i == '}'){
                 highlight --;
             }
-
+            printf("%lc", i);
             fflush(stdout);
             usleep(SPEED);
-            i = (char)getc(text);
         }
         putchar('\n');
         fclose(text);
-        return 0;
+        return EXIT_SUCCESS;
     }
     
 
